@@ -218,6 +218,7 @@ void ParseXmlToDatum(const string& annoname, const map<string, int>& label_map,
     LOG(WARNING) << "When paring " << annoname << ": " << e.what();
   }
   datum->clear_float_data();
+  LOG(INFO) << " annoname = " << annoname;
   BOOST_FOREACH(ptree::value_type &v1, pt.get_child("annotation")) {
     if (v1.first == "object") {
       ptree object = v1.second;
@@ -234,10 +235,10 @@ void ParseXmlToDatum(const string& annoname, const map<string, int>& label_map,
             LOG(FATAL) << "Anno file " << annoname << " -> unknown name: " << name;
           }
         } else if (v2.first == "bndbox") {
-          int xmin = pt2.get("xmin", 0);
-          int ymin = pt2.get("ymin", 0);
-          int xmax = pt2.get("xmax", 0);
-          int ymax = pt2.get("ymax", 0);
+          float xmin = pt2.get<float>("xmin", 0.0);
+          float ymin = pt2.get<float>("ymin", 0.0);
+          float xmax = pt2.get<float>("xmax", 0.0);
+          float ymax = pt2.get<float>("ymax", 0.0);
           LOG_IF(WARNING, xmin < 0 || xmin > ori_w) << annoname << 
               " bounding box exceeds image boundary";
           LOG_IF(WARNING, xmax < 0 || xmax > ori_w) << annoname << 
@@ -254,6 +255,10 @@ void ParseXmlToDatum(const string& annoname, const map<string, int>& label_map,
           box[1] = float(ymin + (ymax - ymin) / 2.) / ori_h;
           box[2] = float(xmax - xmin) / ori_w;
           box[3] = float(ymax - ymin) / ori_h;
+          
+          //LOG(INFO) << " ori_w = " << ori_w <<", ori_h = " << ori_h;
+          //LOG(INFO) << " xmin = " << xmin << ", xmax = " << xmax << ", ymin = " << ymin << ", ymax = " << ymax;
+          //LOG(INFO) << " box: " << box[0] <<", "<< box[1] <<", "<< box[2] <<", "<< box[3];
         } else if (v2.first == "difficult") {
           difficult = atoi(pt2.data().c_str());
         }
